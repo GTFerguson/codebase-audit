@@ -1,6 +1,16 @@
 # PROVEN Documentation Principles
 
-Reference documentation is the project's institutional memory. Every design decision, algorithm constant, and domain assumption must trace back to documented evidence. Without provenance, knowledge decays into folklore.
+Project documentation is the institutional memory. Every design decision, algorithm constant, and domain assumption must trace back to documented evidence. Without provenance, knowledge decays into folklore.
+
+Three doc types, each with a distinct role:
+
+| Type | Directory | Purpose | Lifespan |
+|------|-----------|---------|----------|
+| **Reference** | `docs/reference/` | Evidence base — domain knowledge with citations | Permanent, updated as evidence evolves |
+| **Architecture** | `docs/architecture/` | How shipped systems work and why they're designed that way | Permanent, updated when systems change |
+| **Plan** | `docs/plans/` | Intent before code exists — what to build and why | Ephemeral, deleted after graduation |
+
+The PROVEN quality principles apply to all three types. The lifecycle flows forward: **research → reference doc → plan → implement → architecture doc → delete plan**.
 
 ## The PROVEN Principles
 
@@ -128,11 +138,9 @@ For frequently cited works, a full reference can go in a "References" section at
 
 ## When to Write an Architecture Doc
 
-Architecture docs explain **how a system works and why it was designed that way**. The same PROVEN quality principles apply — decisions need rationale, not just description.
+Architecture docs explain **how a system works and why it was designed that way**. Decisions need rationale, not just description.
 
-Plans come before implementation; architecture docs come after. A plan captures design intent, an architecture doc captures what was actually built and why. The lifecycle is: **plan → implement → commit → architecture doc → delete/archive plan**.
-
-- **When a feature or system ships** — once code is committed and stable, graduate the design knowledge from the plan into an architecture doc. Don't wait — the context is freshest right after shipping.
+- **When a feature or system ships** — graduate design knowledge from the plan (see Plan Docs lifecycle below). Don't wait — context is freshest right after shipping.
 - **When significantly changing an existing system** — update the architecture doc to reflect the new reality
 - **When design decisions aren't obvious from the code** — tradeoffs, rejected alternatives, and "why not the simpler approach" belong in architecture docs, not code comments
 - **When no plan existed** — if a system was built without a plan doc, it still needs an architecture doc once it ships
@@ -144,6 +152,70 @@ Plans come before implementation; architecture docs come after. A plan captures 
 - **Design decisions** — why this approach over alternatives, with rationale inline (not in a separate decisions directory)
 - **Configuration** — what's tuneable and where the knobs are
 - **Boundaries** — what's in scope and what's deliberately excluded
+
+## Plan Docs
+
+Plan docs capture intent before code exists. They are **ephemeral** — once the work ships and design knowledge graduates to other doc types, the plan is deleted. If a plan file exists, there's still work to do.
+
+### Hierarchy
+
+Three tiers, each linking to the next:
+
+| Tier | Purpose | Lifespan | Example |
+|------|---------|----------|---------|
+| **Roadmap** | Vision-level phases, sequencing, dependencies | Persists while future phases remain | `product-roadmap.md` |
+| **Phase plan** | What a major capability adds, key challenges, integration points, open questions | Deleted when shipped and graduated | `cardio-programming.md` |
+| **Feature backlog** | Specific features with effort estimates, shipped tracking | Deleted when all items ship and graduate | `product-backlog.md` |
+
+Phase plans link up to their parent roadmap. Backlogs link up to their phase plan. Roadmaps link down to both.
+
+### What a Plan Should Contain
+
+- **Context** — the problem or need, what prompted it
+- **What it adds** — capabilities, not implementation detail
+- **Key challenges** — the hard parts, not the obvious parts
+- **Integration points** — how it connects to existing systems
+- **Open questions** — unresolved decisions, noted honestly
+- **Evidence links** — wiki-links to reference docs, not duplicated research
+
+Plans are vision-level by default. Implementation detail (data models, API contracts, code structure) belongs in the plan only when a phase is actively being built — not before.
+
+### Lifecycle
+
+```
+Plan created → work begins → features ship → graduate → plan deleted
+```
+
+**Graduation** means extracting the durable knowledge into the right permanent home:
+
+- Design decisions, data flow, algorithms → architecture doc
+- Research findings gathered during planning → reference doc (if not already there)
+- The plan itself → `rm`
+
+Don't keep "completed" plans around as historical records — that's what architecture docs and git history are for.
+
+### Roadmap Lifecycle
+
+Roadmaps are the exception — they persist as a progress record. As phases complete:
+
+1. The phase section shrinks to a one-line summary with a link to the architecture doc(s)
+2. The detailed phase plan is deleted
+3. The roadmap shows what's shipped, what's in progress, and what's ahead
+
+A roadmap is deleted only when all phases are complete and the product vision is fully realised (or abandoned).
+
+### When to Write a Plan
+
+- **Multi-session work** where scope, dependencies, or trade-offs need alignment before implementation
+- **Cross-system changes** that touch multiple modules or require coordinated effort
+- **New capabilities** that don't have an obvious implementation path
+
+### When NOT to Write a Plan
+
+- Single-feature changes where the implementation is obvious
+- Bug fixes (write a test instead)
+- Refactoring with a clear target state
+- Work that can be fully described in a commit message
 
 ## Directory Organisation
 
