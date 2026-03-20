@@ -118,7 +118,26 @@ For each security finding, estimate a CVSS score.
 | Shotgun Surgery | Change requires many small edits across files |
 | Dead Code | Unused methods, variables, parameters |
 
-#### 5. Performance
+#### 5. Testability & Refactorability
+
+For every high-priority issue (especially god classes, long methods, and architectural smells), assess whether the code can be safely refactored:
+
+| Check | What to look for |
+|-------|-----------------|
+| **Test coverage** | Does the class/method have direct test coverage? Count tested vs untested methods. |
+| **Mock depth** | Are tests using real objects or do they bypass `__init__` and mock everything? Deep mocking means tests won't catch extraction regressions. |
+| **Integration tests** | Are there end-to-end tests that exercise the code path? These are the real safety net. |
+| **Coupling to test infrastructure** | Do tests patch private methods (e.g., `@patch.object(Foo, '_private_method')`)? These break when methods move during extraction. |
+
+For each structural issue (god class, long method), add a **Testability** verdict:
+
+- **Safe to refactor** — Direct test coverage exists, regressions will be caught
+- **Needs characterization tests first** — Coverage is insufficient, write tests that lock in current behavior before extracting
+- **Untestable** — No tests and code is too coupled to mock; refactoring is high-risk without significant test investment
+
+This prevents discovering mid-refactor that you have no safety net — the remediation plan should account for test-writing effort upfront.
+
+#### 6. Performance
 
 - **Database** — N+1 queries, missing indexes, full table scans, unbatched operations
 - **Memory** — Large objects in memory, unbounded arrays, missing cleanup
@@ -127,20 +146,20 @@ For each security finding, estimate a CVSS score.
 - **Concurrency** — Race conditions, missing transactions, thread safety
 - **Algorithmic** — O(n²) or worse where O(n) is possible
 
-#### 6. Error Handling
+#### 7. Error Handling
 
 - **Exceptions** — Caught at appropriate levels? Swallowed silently or logged?
 - **Error Messages** — Do responses leak internals (stack traces, paths, SQL)?
 - **Recovery** — Retry mechanisms for external service calls?
 - **Validation Errors** — Reported clearly to caller?
 
-#### 7. Language-Specific
+#### 8. Language-Specific
 
 **Python:** Circular references, generator opportunities missed, large objects held unnecessarily
 **JavaScript/TypeScript:** Event listener leaks, closure memory leaks, async/await anti-patterns
 **General:** Resource cleanup (file handles, connections), context managers
 
-#### 8. Incomplete Features
+#### 9. Incomplete Features
 
 - TODO comments indicating unfinished work
 - Stub methods returning defaults
@@ -199,6 +218,7 @@ Each issue entry must include:
 - **Evidence** — The actual problematic code with path and line numbers
 - **Impact** — Specific consequences
 - **Remediation** — Concrete working code, not vague advice
+- **Testability** (for HIGH+ structural issues) — Safe to refactor / Needs characterization tests / Untestable. This determines whether remediation effort includes test-writing as a prerequisite.
 
 ---
 
