@@ -1,10 +1,6 @@
-# Scout Browse over MCP
+# Scout Browse
 
-Use `scout-browse` for all browser automation instead of the MCP playwright tools (`mcp__plugin_playwright_*`) or `playwright-cli`. It uses Patchright (anti-detect browser) with a persistent Google profile and NopeCHA CAPTCHA solver — far more capable against anti-bot protections.
-
-## Why
-
-Scout Browse saves snapshots to disk and returns file paths — ~4x more token-efficient than MCP which streams accessibility trees inline into context. It also has better stealth than playwright-cli (Patchright + profile + CAPTCHA solver).
+Use `scout-browse` for all browser automation instead of `playwright-cli`. It uses Patchright (anti-detect browser) with a persistent Google profile and NopeCHA CAPTCHA solver — far more capable against anti-bot protections.
 
 ## Setup
 
@@ -12,10 +8,9 @@ Scout Browse saves snapshots to disk and returns file paths — ~4x more token-e
 source ~/projects/scout-engine/.venv/bin/activate
 ```
 
-## Usage
+## Commands
 
 ```bash
-# Core commands
 scout-browse open <url>           # open browser and navigate
 scout-browse snapshot             # capture page structure + extract embedded JSON
 scout-browse click <ref>          # click element by ref from snapshot
@@ -27,6 +22,8 @@ scout-browse close                # close browser
 ```
 
 ## Flags
+
+Flags go **before** the subcommand (e.g. `scout-browse --headless open <url>`):
 
 - `--headless` — run headless (default is headed, which avoids Cloudflare)
 - `--no-profile` — don't load Google profile
@@ -49,16 +46,17 @@ All output goes to `.scout-browse/` in the current directory:
 - `next-data-{timestamp}.json` — extracted `__NEXT_DATA__` (Next.js)
 - `screenshot-{timestamp}.png` — page screenshots
 - `console-{timestamp}.log` — browser console output
+- `state.json` — browser connection state (for reconnecting between commands)
 
-## Web Research
+## Anti-Bot Stack
 
-For research tasks (fetching academic papers, documentation sites, wikis), **prefer scout-browse over WebFetch**. Many sites (Google Scholar, Wikipedia, ACM, IEEE, Springer) block raw HTTP requests but render fine in a real browser.
+- **Patchright** — patches CDP leaks, removes automation detection at browser level
+- **Google profile** (`~/.scout/profiles/google`) — persistent cookies, logged-in session
+- **NopeCHA** (`~/.scout/extensions/nopecha/`) — auto-solves CAPTCHAs (100 free/day)
 
-```bash
-source ~/projects/scout-engine/.venv/bin/activate
-scout-browse open "https://scholar.google.com/scholar?q=code+ontology"
-cat .scout-browse/page-*.yml   # read rendered content
-scout-browse close
-```
+## When to Use
 
-When spawning subagents for web research, instruct them to use `scout-browse` via Bash instead of WebFetch for sites that require JavaScript or block bots.
+- Browsing sites that block WebFetch (Cloudflare, bot detection)
+- Research tasks requiring JavaScript rendering
+- Inspecting page structure for scraper development
+- Any site that needs a real browser session
