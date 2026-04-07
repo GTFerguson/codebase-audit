@@ -2,41 +2,64 @@
 
 Use `scout-browse` for all browser automation instead of `playwright-cli`. It uses Patchright (anti-detect browser) with a persistent Google profile and NopeCHA CAPTCHA solver — far more capable against anti-bot protections.
 
-## Setup
-
-```bash
-source ~/projects/scout-engine/.venv/bin/activate
-```
-
 ## Commands
 
 ```bash
-scout-browse open <url>           # open browser and navigate
+# Core
+scout-browse open <url>           # launch browser and navigate (names tab from domain)
+scout-browse open <url> --name x  # launch with a custom tab name
 scout-browse snapshot             # capture page structure + extract embedded JSON
 scout-browse click <ref>          # click element by ref from snapshot
 scout-browse fill <ref> <text>    # fill input
 scout-browse type <text>          # type into focused element
-scout-browse goto <url>           # navigate
+scout-browse goto <url>           # navigate current tab
+scout-browse resize <w> <h>      # set viewport size (e.g. 1440 900)
+scout-browse scroll <target>     # up, down, top, bottom, or pixel amount
 scout-browse screenshot           # take screenshot
 scout-browse close                # close browser
+
+# Tab management
+scout-browse tab open <url>             # open new tab (auto-named from domain)
+scout-browse tab open <url> --name x    # open new tab with custom name
+scout-browse tab list                   # list all tabs (* = active)
+scout-browse tab select <name>          # switch active tab
+scout-browse tab close <name>           # close a tab
 ```
 
 ## Flags
 
-Flags go **before** the subcommand (e.g. `scout-browse --headless open <url>`):
+Global flags go **before** the subcommand (e.g. `scout-browse --headless open <url>`):
 
 - `--headless` — run headless (default is headed, which avoids Cloudflare)
 - `--no-profile` — don't load Google profile
 - `--no-extensions` — don't load NopeCHA
 - `--profile <path>` — use custom profile directory
 
-## Pattern
+Per-command `--tab <name>` targets a specific tab without switching the active tab:
+
+```bash
+scout-browse snapshot --tab zoopla    # snapshot a specific tab
+scout-browse click e3 --tab openrent  # click in a specific tab
+```
+
+## Pattern — Single Tab
 
 1. `scout-browse open <url>` — opens browser, returns snapshot path
 2. Read the snapshot YAML: `cat .scout-browse/page-*.yml`
 3. Check for extracted data: `cat .scout-browse/jsonld-*.json` or `cat .scout-browse/next-data-*.json`
 4. `scout-browse click <ref>` / `scout-browse fill <ref> <text>` to interact
 5. `scout-browse snapshot` to capture updated state
+
+## Pattern — Multiple Tabs
+
+1. `scout-browse open <url>` — launch browser with first tab
+2. `scout-browse tab open <url2> --name research` — open second tab
+3. `scout-browse tab list` — see all tabs and which is active
+4. `scout-browse tab select research` — switch to a tab
+5. `scout-browse snapshot` — snapshot targets the active tab
+6. `scout-browse click e3 --tab research` — interact with a specific tab without switching
+
+Snapshot YAML headers include `tab: <name>` so you know which tab each snapshot belongs to.
 
 ## Output Directory
 

@@ -6,12 +6,6 @@ Use `scout-browse` for all browser automation instead of the MCP playwright tool
 
 Scout Browse saves snapshots to disk and returns file paths — ~4x more token-efficient than MCP which streams accessibility trees inline into context. It also has better stealth than playwright-cli (Patchright + profile + CAPTCHA solver).
 
-## Setup
-
-```bash
-source ~/projects/scout-engine/.venv/bin/activate
-```
-
 ## Usage
 
 ```bash
@@ -22,6 +16,8 @@ scout-browse click <ref>          # click element by ref from snapshot
 scout-browse fill <ref> <text>    # fill input
 scout-browse type <text>          # type into focused element
 scout-browse goto <url>           # navigate
+scout-browse resize <w> <h>      # set viewport size (e.g. 1440 900)
+scout-browse scroll <target>     # up, down, top, bottom, or pixel amount
 scout-browse screenshot           # take screenshot
 scout-browse close                # close browser
 ```
@@ -55,7 +51,6 @@ All output goes to `.scout-browse/` in the current directory:
 For research tasks (fetching academic papers, documentation sites, wikis), **prefer scout-browse over WebFetch**. Many sites (Google Scholar, Wikipedia, ACM, IEEE, Springer) block raw HTTP requests but render fine in a real browser.
 
 ```bash
-source ~/projects/scout-engine/.venv/bin/activate
 scout-browse open "https://scholar.google.com/scholar?q=code+ontology"
 cat .scout-browse/page-*.yml   # read rendered content
 scout-browse close
