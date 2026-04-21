@@ -64,9 +64,11 @@ This file is persistent working memory for one in-flight task. Procedure:
 <1–3 sentences on the goal and phase. Link the plan doc if there is one.>
 
 ## Worktree / branch
-- Path: <absolute path>
-- Branch: <branch name>
+- Path: <absolute path — flag explicitly if this is a git worktree, not the main checkout>
+- Branch: <branch name — call out if this is a feature/stream branch rather than main>
 - Last commit: <hash + subject>
+
+> If the work is happening in a worktree or on a non-main branch, say so in bold at the top of this section. A resumer landing in the wrong tree will double-edit and create merge pain.
 
 ## Shipped this session
 - <bullet per commit, hash + one-line summary>
