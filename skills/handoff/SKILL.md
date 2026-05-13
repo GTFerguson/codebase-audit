@@ -18,6 +18,8 @@ After writing, output *only* the absolute path in a single fenced block so the u
 The handoff file is **persistent working memory for one task, across sessions**. Treat it like a plan doc's in-flight state:
 
 - The resuming session reads this file first.
+- The resuming session **opens with a one-sentence status and a one-line preview of the next step or two**, so the user can redirect if the handoff is stale or the priorities have shifted. Then it proceeds with `[safe]` next-actions immediately — reading guides, running validators, editing files. It only blocks for explicit user approval on a `[confirm]`-tagged step, or on anything irreversible / externally visible (deploys, migrations, API calls, branch operations, force-pushes).
+- Asking permission to read a doc, run a validator, or sketch a file is friction the user has explicitly rejected. Orient, then act on the safe stuff; pause only at the risky stuff.
 - The resuming session **updates it** as work progresses (strike through completed next-actions, add new gotchas).
 - When the task ships, the resuming session **graduates** the durable knowledge (design decisions → architecture docs, research → reference docs) and then **deletes** `docs/plans/handoff/<slug>.md`.
 - A handoff file existing means there is still in-flight work. No handoff → no task mid-air.
@@ -55,7 +57,7 @@ Only list levels that exist and are relevant. Skip tiers that don't apply (e.g. 
 
 This file is persistent working memory for one in-flight task. Procedure:
 
-1. **Execute** — read this file first, then resume the Next actions below.
+1. **Orient, then proceed on safe work** — read this file, then open with a one-sentence status plus a one-line preview of the next step or two. Proceed immediately with `[safe]` next-actions (reads, validators, local edits). Stop and confirm only for `[confirm]`-tagged steps or anything irreversible / externally visible (deploys, migrations, external API calls, branch operations). The handoff captures what the *writing* agent planned — the user can redirect if it's stale, but they don't want to grant permission for every safe step.
 2. **Use as persistent reference while building** — update it as you go: tick off next-actions, add new gotchas, revise file lists. This is the single source of truth for "where is this work right now".
 3. **Graduate on completion** — once the task ships, lift the durable knowledge out: design decisions → `docs/architecture/`, research findings → `docs/reference/`. Don't leave it stranded in here.
 4. **Delete this file** — after graduation, `rm` the handoff. Its existence means work is still in the air; absence means done.
@@ -77,7 +79,12 @@ This file is persistent working memory for one in-flight task. Procedure:
 <Only the edits already made to the working tree. File paths with line numbers. What was changed, not why.>
 
 ## Next actions (ordered)
-1. <precise file:line edit or command>
+
+Mark each action with its confirmation requirement:
+- `[safe]` — local, reversible (file edits, local builds, test runs). Resuming agent can execute immediately.
+- `[confirm]` — irreversible or external (deploys, migrations, API calls, branch ops, anything affecting shared state). Resuming agent must present this to the user and wait for explicit approval before executing.
+
+1. <precise file:line edit or command> `[safe|confirm]`
 2. ...
 
 ## Key design decisions
